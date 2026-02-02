@@ -1,0 +1,20 @@
+{
+  "name": "lms-plugin-hindsight",
+  "version": "0.1",
+  "description": "Ask questions about activities recorded by the Hindsight application",
+  "main": "index.js",
+  "scripts": {
+    "dev": "lms dev",
+    "push": "lms push"
+  },
+  "author": "James Nicholson",
+  "license": "ISC",
+  "dependencies": {
+    "@lmstudio/sdk": "1.4.0",
+    "@ts-rest/core": "^3.52.1",
+    "zod": "3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.8"
+  }
+}

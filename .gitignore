@@ -1,0 +1,24 @@
+# Environment
+.env
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Runtime data
+data/
+logs/
+
+# OS files
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Debug
+npm-debug.log*

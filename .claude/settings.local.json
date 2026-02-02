@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(git submodule:*)",
+      "Bash(git rm:*)",
+      "Bash(chmod:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(for pkg in api capture-daemon image-summarizer plugin)",
+      "Bash(do echo \"=== $pkg ===\" ls -la \"/Users/jan535/code/hindsight/packages/$pkg\")",
+      "Bash(tree:*)",
+      "Bash(for pkg in api image-summarizer plugin)",
+      "Bash(do echo '=== $pkg/src ===' find /Users/jan535/code/hindsight/packages/$pkg/src -type f)",
+      "Bash(ls:*)"
+    ]
+  }
+}

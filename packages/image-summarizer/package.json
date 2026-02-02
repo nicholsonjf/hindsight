@@ -1,0 +1,23 @@
+{
+  "name": "image-summarizer",
+  "version": "0.0.0",
+  "description": "A TypeScript CLI tool that sends screenshots to LM Studio for AI-powered summarization and logs to a worklog API",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "start": "tsc && node --enable-source-maps dist/index.js",
+    "build": "tsc"
+  },
+  "author": "Your Name",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "lmstudio-js": "file:/Users/jan535/code/lmstudio-js"
+  },
+  "gitHead": "d95ce2feb067b4eec446c673155631ee1734e982",
+  "devDependencies": {
+    "@types/node": "^22.13.1",
+    "typescript": "^5.7.2"
+  }
+}
