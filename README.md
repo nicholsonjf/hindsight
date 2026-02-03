@@ -121,7 +121,7 @@ hindsight/
 ├── package.json            # npm workspaces root
 ├── .env                    # Configuration (created by install.sh)
 ├── .env.example            # Configuration template
-├── lmstudio.js/            # SDK (cloned by install.sh)
+├── lmstudio-js/            # SDK (cloned by install.sh)
 ├── packages/
 │   ├── api/                # Express/SQLite worklog server
 │   ├── capture-daemon/     # Screenshot capture (bash)

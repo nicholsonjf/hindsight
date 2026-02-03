@@ -110,40 +110,40 @@ echo -e "${GREEN}All prerequisites satisfied!${NC}"
 echo ""
 
 # ─────────────────────────────────────────────────────────────────
-# lmstudio.js SDK Setup
+# lmstudio-js SDK Setup
 # ─────────────────────────────────────────────────────────────────
 
-LMSTUDIO_JS_DIR="$SCRIPT_DIR/lmstudio.js"
+LMSTUDIO_JS_DIR="$SCRIPT_DIR/lmstudio-js"
 
-echo -e "${BLUE}Setting up lmstudio.js SDK...${NC}"
+echo -e "${BLUE}Setting up lmstudio-js SDK...${NC}"
 echo ""
 
 if [[ -d "$LMSTUDIO_JS_DIR" ]]; then
-    echo -e "  ${GREEN}Found existing lmstudio.js directory${NC}"
+    echo -e "  ${GREEN}Found existing lmstudio-js directory${NC}"
 
     # Check if it needs to be built
     if [[ ! -d "$LMSTUDIO_JS_DIR/publish/sdk" ]]; then
-        echo "  Building lmstudio.js SDK..."
+        echo "  Building lmstudio-js SDK..."
         (cd "$LMSTUDIO_JS_DIR" && npm install && npm run build)
     fi
 else
-    echo "  Cloning lmstudio.js from GitHub..."
-    git clone https://github.com/lmstudio-ai/lmstudio.js.git "$LMSTUDIO_JS_DIR"
+    echo "  Cloning lmstudio-js from GitHub..."
+    git clone https://github.com/lmstudio-ai/lmstudio-js.git "$LMSTUDIO_JS_DIR"
 
-    echo "  Installing lmstudio.js dependencies..."
+    echo "  Installing lmstudio-js dependencies..."
     (cd "$LMSTUDIO_JS_DIR" && npm install)
 
-    echo "  Building lmstudio.js SDK..."
+    echo "  Building lmstudio-js SDK..."
     (cd "$LMSTUDIO_JS_DIR" && npm run build)
 fi
 
 # Verify SDK was built
 if [[ ! -d "$LMSTUDIO_JS_DIR/publish/sdk" ]]; then
-    echo -e "${RED}Error: lmstudio.js SDK build failed (publish/sdk not found)${NC}"
+    echo -e "${RED}Error: lmstudio-js SDK build failed (publish/sdk not found)${NC}"
     exit 1
 fi
 
-echo -e "  ${GREEN}lmstudio.js SDK ready${NC}"
+echo -e "  ${GREEN}lmstudio-js SDK ready${NC}"
 echo ""
 
 # ─────────────────────────────────────────────────────────────────
