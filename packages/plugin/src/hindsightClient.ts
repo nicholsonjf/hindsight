@@ -14,6 +14,17 @@ export const hindsightContract = c.router({
       200: z.unknown(),
     },
   },
+  getWorklogs: {
+    method: "GET",
+    path: "/worklogs",
+    query: z.object({
+      start: z.coerce.number(),
+      end: z.coerce.number(),
+    }),
+    responses: {
+      200: z.unknown(),
+    },
+  },
 });
 
 export function createHindsightClient(baseUrl: string) {
