@@ -39,39 +39,11 @@ if [[ "$(uname)" != "Darwin" ]]; then
 fi
 echo -e "${GREEN}OK${NC} ($(sw_vers -productVersion))"
 
-# Check Node.js 18+
-echo -n "  Node.js 18+: "
+# Check Node.js
+echo -n "  Node.js: "
 if ! command -v node &> /dev/null; then
-    echo -e "${YELLOW}NOT FOUND${NC}"
-    echo ""
-    echo "  Node.js is required but not installed."
-    read -p "  Install Node.js via Homebrew? [Y/n] " -n 1 -r
-    echo ""
-    if [[ $REPLY =~ ^[Nn]$ ]]; then
-        echo "  Please install Node.js 18+ manually and re-run this script."
-        exit 1
-    fi
-
-    # Check for Homebrew
-    if ! command -v brew &> /dev/null; then
-        echo "  Installing Homebrew..."
-        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    fi
-
-    echo "  Installing Node.js..."
-    brew install node
-
-    if ! command -v node &> /dev/null; then
-        echo -e "${RED}  Failed to install Node.js${NC}"
-        exit 1
-    fi
-fi
-
-NODE_VERSION=$(node -v | sed 's/v//' | cut -d. -f1)
-if [[ "$NODE_VERSION" -lt 18 ]]; then
-    echo -e "${RED}FAILED${NC} (v$(node -v))"
-    echo "  Error: Node.js 18+ is required, but found $(node -v)"
-    echo "  Please upgrade Node.js and re-run this script."
+    echo -e "${RED}NOT FOUND${NC}"
+    echo "  Node.js is required. Install from https://nodejs.org/"
     exit 1
 fi
 echo -e "${GREEN}OK${NC} ($(node -v))"
@@ -229,9 +201,9 @@ echo "  Creating data directories..."
 mkdir -p data/screenshots
 mkdir -p logs
 
-# Install npm dependencies
+# Install npm dependencies (--engine-strict enforces Node.js version from package.json)
 echo "  Installing npm dependencies (this may take a moment)..."
-npm install
+npm install --engine-strict
 
 echo ""
 echo -e "${GREEN}╔════════════════════════════════════════════════════════════╗${NC}"
