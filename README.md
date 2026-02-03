@@ -72,10 +72,11 @@ Navigate to `http://localhost:5173` (or your configured WEB_PORT) to view the ac
 ### Service Management
 
 ```bash
-./hindsight.sh start   # Start all services (API, capture, web, plugin)
-./hindsight.sh stop    # Stop all services
-./hindsight.sh status  # Show service status
-./hindsight.sh logs    # Tail log files
+./hindsight.sh start      # Start all services (API, capture, web, plugin)
+./hindsight.sh start -v   # Start with verbose API request logging
+./hindsight.sh stop       # Stop all services
+./hindsight.sh status     # Show service status
+./hindsight.sh logs       # Tail log files
 ```
 
 ### Web Dashboard
