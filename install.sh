@@ -118,9 +118,12 @@ echo ""
 
 # Get lmstudio-js SDK path
 echo "The image-summarizer requires the lmstudio-js SDK."
-echo "Clone it from: https://github.com/lmstudio-ai/lmstudio.js"
+echo "Clone it from: https://github.com/lmstudio-ai/lmstudio-js"
+echo "Then install and build with:"
+echo "  npm install"
+echo "  npm run build"
 echo ""
-read -p "Enter path to lmstudio-js/packages/lmstudio-js: " LMSTUDIO_SDK_PATH
+read -p "Enter the path to the lmstudio-js directory: " LMSTUDIO_SDK_PATH
 
 # Expand ~ to home directory
 LMSTUDIO_SDK_PATH="${LMSTUDIO_SDK_PATH/#\~/$HOME}"

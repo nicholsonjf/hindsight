@@ -13,7 +13,7 @@
   "license": "UNLICENSED",
   "dependencies": {
     "dotenv": "^16.4.5",
-    "lmstudio-js": "file:/Users/jan535/code/lmstudio-js"
+    "lmstudio-js": "file:__LMSTUDIO_SDK_PATH__/publish/sdk"
   },
   "gitHead": "d95ce2feb067b4eec446c673155631ee1734e982",
   "devDependencies": {
