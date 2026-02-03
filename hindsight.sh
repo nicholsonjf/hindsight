@@ -20,11 +20,13 @@ cd "$SCRIPT_DIR"
 API_PID_FILE="$SCRIPT_DIR/data/api.pid"
 CAPTURE_PID_FILE="$SCRIPT_DIR/data/capture.pid"
 WEB_PID_FILE="$SCRIPT_DIR/data/web.pid"
+PLUGIN_PID_FILE="$SCRIPT_DIR/data/plugin.pid"
 
 # Log file locations
 API_LOG="$SCRIPT_DIR/logs/api.log"
 CAPTURE_LOG="$SCRIPT_DIR/logs/capture.log"
 WEB_LOG="$SCRIPT_DIR/logs/web.log"
+PLUGIN_LOG="$SCRIPT_DIR/logs/plugin.log"
 
 # Load environment variables
 if [[ -f "$SCRIPT_DIR/.env" ]]; then
@@ -68,6 +70,17 @@ is_web_running() {
     if [[ -f "$WEB_PID_FILE" ]]; then
         local pid
         pid=$(cat "$WEB_PID_FILE")
+        if ps -p "$pid" > /dev/null 2>&1; then
+            return 0
+        fi
+    fi
+    return 1
+}
+
+is_plugin_running() {
+    if [[ -f "$PLUGIN_PID_FILE" ]]; then
+        local pid
+        pid=$(cat "$PLUGIN_PID_FILE")
         if ps -p "$pid" > /dev/null 2>&1; then
             return 0
         fi
@@ -179,6 +192,28 @@ cmd_start() {
         fi
     fi
 
+    # Start LM Studio plugin dev server
+    if is_plugin_running; then
+        echo -e "${YELLOW}Plugin dev server is already running (PID: $(cat "$PLUGIN_PID_FILE"))${NC}"
+    else
+        echo -n "  Starting LM Studio plugin dev server... "
+
+        # Start plugin dev server in background
+        nohup npm run dev --prefix "$SCRIPT_DIR/packages/plugin" >> "$PLUGIN_LOG" 2>&1 &
+        local plugin_pid=$!
+        echo "$plugin_pid" > "$PLUGIN_PID_FILE"
+
+        # Wait a moment and check if it started
+        sleep 2
+        if ps -p "$plugin_pid" > /dev/null 2>&1; then
+            echo -e "${GREEN}OK${NC} (PID: $plugin_pid)"
+        else
+            echo -e "${RED}FAILED${NC}"
+            echo "  Check logs: $PLUGIN_LOG"
+            rm -f "$PLUGIN_PID_FILE"
+        fi
+    fi
+
     echo ""
     echo -e "${GREEN}Hindsight is running!${NC}"
     echo ""
@@ -193,6 +228,16 @@ cmd_stop() {
     echo ""
 
     local stopped=0
+
+    if is_plugin_running; then
+        local pid
+        pid=$(cat "$PLUGIN_PID_FILE")
+        echo -n "  Stopping plugin dev server (PID: $pid)... "
+        kill "$pid" 2>/dev/null || true
+        rm -f "$PLUGIN_PID_FILE"
+        echo -e "${GREEN}OK${NC}"
+        stopped=1
+    fi
 
     if is_web_running; then
         local pid
@@ -263,6 +308,15 @@ cmd_status() {
         echo -e "${RED}Stopped${NC}"
     fi
 
+    echo -n "  Plugin Dev:     "
+    if is_plugin_running; then
+        local pid
+        pid=$(cat "$PLUGIN_PID_FILE")
+        echo -e "${GREEN}Running${NC} (PID: $pid)"
+    else
+        echo -e "${RED}Stopped${NC}"
+    fi
+
     echo -n "  LM Studio:      "
     if check_lm_studio; then
         echo -e "${GREEN}Available${NC} (ws://127.0.0.1:1234)"
@@ -291,7 +345,7 @@ cmd_logs() {
     echo ""
 
     # Tail all log files
-    tail -f "$API_LOG" "$CAPTURE_LOG" "$WEB_LOG" 2>/dev/null || {
+    tail -f "$API_LOG" "$CAPTURE_LOG" "$WEB_LOG" "$PLUGIN_LOG" 2>/dev/null || {
         echo "No log files found. Start Hindsight first:"
         echo "  ./hindsight.sh start"
     }
@@ -303,7 +357,7 @@ cmd_help() {
     echo "Usage: $0 <command>"
     echo ""
     echo "Commands:"
-    echo "  start   Start API server and capture daemon"
+    echo "  start   Start all services (API, capture, web, plugin)"
     echo "  stop    Stop all services"
     echo "  status  Show service status"
     echo "  logs    Tail log files (Ctrl+C to stop)"

@@ -51,6 +51,8 @@ The installer will:
 - Install npm dependencies
 - Build TypeScript packages
 
+If `.env` already exists, the installer skips configuration prompts and proceeds directly to installation. This allows re-running the installer after pulling updates.
+
 ### 4. Start LM Studio
 
 Open LM Studio and load a vision-capable model (e.g., `qwen/qwen3-vl-4b`).
@@ -70,7 +72,7 @@ Navigate to `http://localhost:5173` (or your configured WEB_PORT) to view the ac
 ### Service Management
 
 ```bash
-./hindsight.sh start   # Start API server, capture daemon, and web dashboard
+./hindsight.sh start   # Start all services (API, capture, web, plugin)
 ./hindsight.sh stop    # Stop all services
 ./hindsight.sh status  # Show service status
 ./hindsight.sh logs    # Tail log files
@@ -155,7 +157,9 @@ Bash script that captures screenshots at regular intervals and sends them to the
 Node.js CLI that sends screenshots to LM Studio's vision model and posts summaries to the API.
 
 ### packages/plugin
-LM Studio plugin that provides a tool to query activity logs from within LM Studio chat.
+LM Studio plugin that provides tools to query activity logs from within LM Studio chat:
+- `available_hindsight_logs` - Get counts of available worklog entries
+- `get_hindsight_logs` - Retrieve worklog entries for a date range
 
 ### packages/web
 React web dashboard with:
@@ -216,6 +220,9 @@ cd packages/api && npm run dev
 
 # Run web dashboard in development mode
 cd packages/web && npm run dev
+
+# Run plugin in development mode
+cd packages/plugin && npm run dev
 
 # Run capture daemon manually
 bash packages/capture-daemon/capture.sh ./data/screenshots/ 1
