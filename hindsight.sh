@@ -39,6 +39,7 @@ fi
 PORT="${PORT:-3000}"
 CAPTURE_INTERVAL="${CAPTURE_INTERVAL:-5}"
 WEB_PORT="${WEB_PORT:-5173}"
+VERBOSE=0
 
 # ─────────────────────────────────────────────────────────────────
 # Helper Functions
@@ -102,6 +103,9 @@ check_lm_studio() {
 
 cmd_start() {
     echo -e "${BLUE}Starting Hindsight services...${NC}"
+    if [[ $VERBOSE -eq 1 ]]; then
+        echo -e "${YELLOW}Verbose mode enabled - API requests will be logged${NC}"
+    fi
     echo ""
 
     # Ensure directories exist
@@ -115,7 +119,7 @@ cmd_start() {
         echo -n "  Starting API server on port $PORT... "
 
         # Start API server in background
-        nohup node "$SCRIPT_DIR/packages/api/dist/index.js" >> "$API_LOG" 2>&1 &
+        VERBOSE=$VERBOSE nohup node "$SCRIPT_DIR/packages/api/dist/index.js" >> "$API_LOG" 2>&1 &
         local api_pid=$!
         echo "$api_pid" > "$API_PID_FILE"
 
@@ -354,20 +358,24 @@ cmd_logs() {
 cmd_help() {
     echo "Hindsight Service Manager"
     echo ""
-    echo "Usage: $0 <command>"
+    echo "Usage: $0 <command> [options]"
     echo ""
     echo "Commands:"
-    echo "  start   Start all services (API, capture, web, plugin)"
-    echo "  stop    Stop all services"
-    echo "  status  Show service status"
-    echo "  logs    Tail log files (Ctrl+C to stop)"
-    echo "  help    Show this help message"
+    echo "  start [-v]  Start all services (API, capture, web, plugin)"
+    echo "  stop        Stop all services"
+    echo "  status      Show service status"
+    echo "  logs        Tail log files (Ctrl+C to stop)"
+    echo "  help        Show this help message"
+    echo ""
+    echo "Options:"
+    echo "  -v, --verbose   Enable verbose API logging (logs all requests)"
     echo ""
     echo "Examples:"
-    echo "  $0 start    # Start all services"
-    echo "  $0 status   # Check what's running"
-    echo "  $0 logs     # Watch log output"
-    echo "  $0 stop     # Stop all services"
+    echo "  $0 start       # Start all services"
+    echo "  $0 start -v    # Start with verbose API logging"
+    echo "  $0 status      # Check what's running"
+    echo "  $0 logs        # Watch log output"
+    echo "  $0 stop        # Stop all services"
 }
 
 # ─────────────────────────────────────────────────────────────────
@@ -376,6 +384,19 @@ cmd_help() {
 
 case "${1:-help}" in
     start)
+        shift
+        while [[ $# -gt 0 ]]; do
+            case "$1" in
+                -v|--verbose)
+                    VERBOSE=1
+                    shift
+                    ;;
+                *)
+                    echo -e "${RED}Unknown option for start: $1${NC}"
+                    exit 1
+                    ;;
+            esac
+        done
         cmd_start
         ;;
     stop)

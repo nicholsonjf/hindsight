@@ -6,12 +6,41 @@ import { initDatabase } from './database.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const VERBOSE = process.env.VERBOSE === '1';
 
 // Initialize database
 initDatabase();
 
 // Parse JSON request bodies
 app.use(express.json());
+
+// Verbose request logging middleware
+if (VERBOSE) {
+  app.use((req, res, next) => {
+    const start = Date.now();
+    const timestamp = new Date().toISOString();
+
+    // Log request
+    console.log(`[${timestamp}] --> ${req.method} ${req.url}`);
+    if (Object.keys(req.query).length > 0) {
+      console.log(`    Query: ${JSON.stringify(req.query)}`);
+    }
+    if (req.body && Object.keys(req.body).length > 0) {
+      console.log(`    Body: ${JSON.stringify(req.body)}`);
+    }
+
+    // Capture response
+    const originalSend = res.send;
+    res.send = function (body) {
+      const duration = Date.now() - start;
+      console.log(`[${timestamp}] <-- ${req.method} ${req.url} ${res.statusCode} (${duration}ms)`);
+      return originalSend.call(this, body);
+    };
+
+    next();
+  });
+  console.log('Verbose logging enabled - all requests will be logged');
+}
 
 // Create ts-rest endpoints
 createExpressEndpoints(contract, router, app);
