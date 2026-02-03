@@ -23,12 +23,18 @@ Hindsight is an AI-powered activity tracking system for macOS. It captures scree
 npm install && npm run build
 
 # Package-specific development
-npm run dev --workspace=packages/api      # API with hot reload
+npm run dev --workspace=packages/api      # API with hot reload (tsx watch)
 npm run dev --workspace=packages/web      # Vite dev server
 npm run dev --workspace=packages/plugin   # Plugin dev mode (lms dev)
 
+# Test production web build
+npm run preview --workspace=packages/web  # Serves dist on port 5173
+
 # Test image summarizer directly
 node packages/image-summarizer/dist/index.js /path/to/image.png qwen/qwen3-vl-4b
+
+# Run capture daemon manually (for testing)
+bash packages/capture-daemon/capture.sh ./data/screenshots/ 0.1  # 6-second interval
 ```
 
 ## Architecture
@@ -64,21 +70,23 @@ lmstudio-js/              Local SDK dependency (cloned at install)
 
 ## Technical Notes
 
+- **Node.js**: Requires Node.js 22.x (see `engines` in package.json)
 - **Local SDK dependency**: image-summarizer and web use `file:../../lmstudio-js/...` - the npm package has a bug
-- **Module systems vary**: API uses ES2022 modules, plugin uses CommonJS
+- **Module systems vary**: API/image-summarizer/web use ES modules (`"type": "module"`), plugin uses CommonJS
 - **Database**: SQLite `worklogs.db` created at runtime in packages/api/
 - **LM Studio connection**: WebSocket at `ws://127.0.0.1:1234`
 - **Timestamp extraction**: image-summarizer gets timestamp from filename (Unix epoch), not EXIF
 - **PID files**: Services track processes via `data/*.pid` files
+- **No test suite**: Tests are not implemented (placeholder scripts only)
 
 ## API Contract
 
 Endpoints defined in `packages/api/src/contract.ts`:
-- `POST /worklogs` - Create worklog entry
+- `POST /worklogs` - Create worklog entry (body: `{timestamp, log}`)
 - `GET /worklogs?start=&end=` - Query by Unix timestamp range
-- `GET /worklogs/counts` - Get entry counts by date
+- `GET /worklogs/counts?offset=14` - Get entry counts by date (offset: days to look back, 1-365)
 
-All validation uses Zod schemas via ts-rest.
+All validation uses Zod schemas via ts-rest. Types are exported: `Worklog`, `CreateWorklogRequest`, `GetWorklogsQuery`.
 
 ## Plugin Tools
 
