@@ -29,7 +29,7 @@ export default defineConfig(({ mode }) => {
         // Fix: @lmstudio/lms-isomorphic package.json has browser: "dist/cjs/browser.js"
         // but Vite needs ESM. Redirect to the ESM version.
         '@lmstudio/lms-isomorphic': env.LMSTUDIO_SDK_PATH
-          ? path.resolve(env.LMSTUDIO_SDK_PATH, '../lms-isomorphic/dist/esm/browser.js')
+          ? path.resolve(env.LMSTUDIO_SDK_PATH, 'packages/lms-isomorphic/dist/esm/browser.js')
           : path.resolve(__dirname, '../../node_modules/lmstudio-js/node_modules/@lmstudio/lms-isomorphic/dist/esm/browser.js')
       }
     }
