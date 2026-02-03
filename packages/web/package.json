@@ -9,7 +9,7 @@
     "preview": "vite preview --port 5173"
   },
   "dependencies": {
-    "lmstudio-js": "file:__LMSTUDIO_SDK_PATH__/publish/sdk",
+    "lmstudio-js": "file:../../lmstudio.js/publish/sdk",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

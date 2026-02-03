@@ -1,6 +1,9 @@
 # Environment
 .env
 
+# SDK (cloned during install)
+lmstudio.js/
+
 # Dependencies
 node_modules/
 

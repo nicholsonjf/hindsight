@@ -110,6 +110,43 @@ echo -e "${GREEN}All prerequisites satisfied!${NC}"
 echo ""
 
 # ─────────────────────────────────────────────────────────────────
+# lmstudio.js SDK Setup
+# ─────────────────────────────────────────────────────────────────
+
+LMSTUDIO_JS_DIR="$SCRIPT_DIR/lmstudio.js"
+
+echo -e "${BLUE}Setting up lmstudio.js SDK...${NC}"
+echo ""
+
+if [[ -d "$LMSTUDIO_JS_DIR" ]]; then
+    echo -e "  ${GREEN}Found existing lmstudio.js directory${NC}"
+
+    # Check if it needs to be built
+    if [[ ! -d "$LMSTUDIO_JS_DIR/publish/sdk" ]]; then
+        echo "  Building lmstudio.js SDK..."
+        (cd "$LMSTUDIO_JS_DIR" && npm install && npm run build)
+    fi
+else
+    echo "  Cloning lmstudio.js from GitHub..."
+    git clone https://github.com/lmstudio-ai/lmstudio.js.git "$LMSTUDIO_JS_DIR"
+
+    echo "  Installing lmstudio.js dependencies..."
+    (cd "$LMSTUDIO_JS_DIR" && npm install)
+
+    echo "  Building lmstudio.js SDK..."
+    (cd "$LMSTUDIO_JS_DIR" && npm run build)
+fi
+
+# Verify SDK was built
+if [[ ! -d "$LMSTUDIO_JS_DIR/publish/sdk" ]]; then
+    echo -e "${RED}Error: lmstudio.js SDK build failed (publish/sdk not found)${NC}"
+    exit 1
+fi
+
+echo -e "  ${GREEN}lmstudio.js SDK ready${NC}"
+echo ""
+
+# ─────────────────────────────────────────────────────────────────
 # Configuration
 # ─────────────────────────────────────────────────────────────────
 
@@ -117,36 +154,8 @@ echo ""
 if [[ -f "$SCRIPT_DIR/.env" ]]; then
     echo -e "${GREEN}Found existing .env file, skipping configuration...${NC}"
     echo ""
-    # Source existing .env to get LMSTUDIO_SDK_PATH for package.json updates
-    source "$SCRIPT_DIR/.env"
 else
     echo -e "${BLUE}Configuration${NC}"
-    echo ""
-
-    # Get lmstudio-js SDK path
-    echo "The image-summarizer requires the lmstudio-js SDK."
-    echo "Clone it from: https://github.com/lmstudio-ai/lmstudio-js"
-    echo "Then install and build with:"
-    echo "  npm install"
-    echo "  npm run build"
-    echo ""
-    read -p "Enter the path to the lmstudio-js directory: " LMSTUDIO_SDK_PATH
-
-    # Expand ~ to home directory
-    LMSTUDIO_SDK_PATH="${LMSTUDIO_SDK_PATH/#\~/$HOME}"
-
-    # Validate SDK path
-    if [[ ! -d "$LMSTUDIO_SDK_PATH" ]]; then
-        echo -e "${RED}Error: Directory not found: $LMSTUDIO_SDK_PATH${NC}"
-        exit 1
-    fi
-
-    if [[ ! -f "$LMSTUDIO_SDK_PATH/package.json" ]]; then
-        echo -e "${RED}Error: Not a valid npm package (no package.json): $LMSTUDIO_SDK_PATH${NC}"
-        exit 1
-    fi
-
-    echo -e "${GREEN}SDK path validated${NC}"
     echo ""
 
     # Get LM Studio API token
@@ -194,9 +203,6 @@ else
 # LM Studio API token
 LM_API_TOKEN=$LM_API_TOKEN
 
-# Path to lmstudio-js SDK
-LMSTUDIO_SDK_PATH=$LMSTUDIO_SDK_PATH
-
 # API server port
 PORT=$PORT
 
@@ -217,11 +223,6 @@ fi
 
 echo -e "${BLUE}Installing Hindsight...${NC}"
 echo ""
-
-# Update image-summarizer and web package.json with SDK path
-echo "  Configuring lmstudio-js SDK path..."
-sed -i '' "s|__LMSTUDIO_SDK_PATH__|$LMSTUDIO_SDK_PATH|g" packages/image-summarizer/package.json
-sed -i '' "s|__LMSTUDIO_SDK_PATH__|$LMSTUDIO_SDK_PATH|g" packages/web/package.json
 
 # Create data and logs directories
 echo "  Creating data directories..."

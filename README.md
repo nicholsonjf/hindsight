@@ -16,7 +16,6 @@ AI-powered activity tracking for macOS. Hindsight automatically captures screens
 - **macOS** (required for `screencapture`)
 - **Node.js 18+**
 - **LM Studio** with a vision-capable model (e.g., `qwen/qwen3-vl-4b`)
-- **lmstudio.js SDK** - Clone from [lmstudio-ai/lmstudio.js](https://github.com/lmstudio-ai/lmstudio.js)
 
 ## Quick Start
 
@@ -27,17 +26,7 @@ git clone https://github.com/your-username/hindsight.git
 cd hindsight
 ```
 
-### 2. Clone the lmstudio.js SDK
-
-```bash
-# Outside the hindsight directory
-git clone https://github.com/lmstudio-ai/lmstudio.js.git
-cd lmstudio.js
-npm install
-npm run build
-```
-
-### 3. Run the installer
+### 2. Run the installer
 
 ```bash
 ./install.sh
@@ -45,7 +34,7 @@ npm run build
 
 The installer will:
 - Check prerequisites (macOS, Node.js 18+, Xcode CLT)
-- Prompt for lmstudio.js SDK path
+- Clone and build the lmstudio.js SDK
 - Prompt for LM Studio API token
 - Configure capture interval and other settings
 - Install npm dependencies
@@ -110,9 +99,6 @@ Configuration is stored in `.env` at the project root:
 # LM Studio API token (from LM Studio > Settings > Developer)
 LM_API_TOKEN=your-token-here
 
-# Path to lmstudio.js SDK
-LMSTUDIO_SDK_PATH=/path/to/lmstudio.js/packages/lmstudio-js
-
 # API server port
 PORT=3000
 
@@ -135,6 +121,7 @@ hindsight/
 ├── package.json            # npm workspaces root
 ├── .env                    # Configuration (created by install.sh)
 ├── .env.example            # Configuration template
+├── lmstudio.js/            # SDK (cloned by install.sh)
 ├── packages/
 │   ├── api/                # Express/SQLite worklog server
 │   ├── capture-daemon/     # Screenshot capture (bash)
