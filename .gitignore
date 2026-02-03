@@ -10,6 +10,7 @@ dist/
 # Runtime data
 data/
 logs/
+*.db
 
 # OS files
 .DS_Store
