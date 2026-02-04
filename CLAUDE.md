@@ -66,6 +66,10 @@ lmstudio-js/              Local SDK dependency (cloned at install)
 | `packages/api/src/database.ts` | SQLite wrapper (better-sqlite3) |
 | `packages/image-summarizer/src/index.ts` | Vision model integration |
 | `packages/plugin/src/toolsProvider.ts` | LM Studio tool definitions |
+| `packages/plugin/src/hindsightClient.ts` | ts-rest client for API |
+| `packages/plugin/src/configSchematics.ts` | Plugin configuration schema |
+| `packages/web/src/components/WorklogPanel.jsx` | Activity stream display |
+| `packages/web/src/components/ChatPanel.jsx` | AI chat interface |
 | `hindsight.sh` | Service lifecycle management |
 
 ## Technical Notes
@@ -104,5 +108,6 @@ PORT=3000                   # API server port
 CAPTURE_INTERVAL=5          # Screenshot interval (minutes)
 VISION_MODEL=qwen/qwen3-vl-4b
 WEB_PORT=5173
-VERBOSE=1                   # Optional: enable API request logging
 ```
+
+Use `./hindsight.sh start -v` to enable verbose API request logging.
