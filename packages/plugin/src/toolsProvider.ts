@@ -57,8 +57,29 @@ export async function toolsProvider(ctl: ToolsProviderController) {
     },
     implementation: async ({ start, end }, { warn }) => {
       try {
-        const startTimestamp = Math.floor(new Date(start).getTime() / 1000);
-        const endTimestamp = Math.floor(new Date(end).getTime() / 1000);
+        // Parse the UTC dates but interpret them as local dates
+        // This matches how getWorklogCountsByDay groups by local date
+        const startDate = new Date(start);
+        const endDate = new Date(end);
+
+        // Create local midnight for the start date
+        const localStart = new Date(
+          startDate.getUTCFullYear(),
+          startDate.getUTCMonth(),
+          startDate.getUTCDate(),
+          0, 0, 0, 0
+        );
+
+        // Create local end-of-day for the end date
+        const localEnd = new Date(
+          endDate.getUTCFullYear(),
+          endDate.getUTCMonth(),
+          endDate.getUTCDate(),
+          23, 59, 59, 999
+        );
+
+        const startTimestamp = Math.floor(localStart.getTime() / 1000);
+        const endTimestamp = Math.floor(localEnd.getTime() / 1000);
 
         const response = await client.getWorklogs({
           query: { start: startTimestamp, end: endTimestamp },
