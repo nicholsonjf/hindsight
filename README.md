@@ -1,6 +1,8 @@
-# Hindsight
+<p align="center">
+<img height="350" alt="logo" src="https://github.com/user-attachments/assets/0af0b95f-8ff4-4ef8-b216-2f7eaa2d4fce" />
+</p>
 
-AI-powered activity tracking for macOS. Hindsight automatically captures screenshots at regular intervals and uses a local vision model (via LM Studio) to summarize what you're working on.
+AI-powered activity tracking for macOS. Hindsight automatically captures screenshots at regular intervals and uses a local vision model to summarize what you're working on. Powered by LM Studio.
 
 ## Features
 
