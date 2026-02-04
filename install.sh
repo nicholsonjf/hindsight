@@ -196,12 +196,17 @@ mkdir -p data/screenshots
 mkdir -p logs
 
 # Install and build each package individually
-PACKAGES=("packages/api" "packages/image-summarizer" "packages/plugin" "packages/web")
+echo "  Installing and building packages/api..."
+(cd packages/api && npm install && npm run build)
 
-for pkg in "${PACKAGES[@]}"; do
-    echo "  Installing and building $pkg..."
-    (cd "$pkg" && npm install && npm run build)
-done
+echo "  Installing and building packages/image-summarizer..."
+(cd packages/image-summarizer && npm install && npm run build)
+
+echo "  Installing packages/plugin..."
+(cd packages/plugin && npm install)
+
+echo "  Installing and building packages/web..."
+(cd packages/web && npm install && npm run build)
 
 echo ""
 echo -e "${GREEN}╔════════════════════════════════════════════════════════════╗${NC}"
