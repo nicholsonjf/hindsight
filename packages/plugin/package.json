@@ -10,7 +10,7 @@
   "author": "James Nicholson",
   "license": "ISC",
   "dependencies": {
-    "@lmstudio/sdk": "1.4.0",
+    "@lmstudio/sdk": "1.5.0",
     "@ts-rest/core": "^3.52.1",
     "zod": "3.24.1"
   },
