@@ -25,7 +25,7 @@ AI-powered activity tracking for macOS. Hindsight automatically captures screens
 > Use `nvm install 22.21.1` or download from [nodejs.org](https://nodejs.org/)
 
 - **macOS** (required for `screencapture`)
-- **LM Studio** with a vision-capable model (e.g., `qwen/qwen3-vl-4b`)
+- **LM Studio** with a vision-capable model (e.g., `qwen/qwen3-vl-8b`)
 
 ## Quick Start
 
@@ -115,7 +115,7 @@ PORT=3000
 CAPTURE_INTERVAL=5
 
 # Vision model for summarization
-VISION_MODEL=qwen/qwen3-vl-4b
+VISION_MODEL=qwen/qwen3-vl-8b
 
 # Web dashboard port
 WEB_PORT=5173
@@ -177,7 +177,7 @@ Make sure LM Studio is running and has loaded a vision model. The capture daemon
 2. Verify the vision model is loaded in LM Studio
 3. Test the image-summarizer directly:
    ```bash
-   node packages/image-summarizer/dist/index.js /path/to/test.png qwen/qwen3-vl-4b
+   node packages/image-summarizer/dist/index.js /path/to/test.png qwen/qwen3-vl-8b
    ```
 
 ### API server not responding
