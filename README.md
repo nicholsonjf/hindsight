@@ -44,17 +44,17 @@ The installer will:
 
 If `.env` already exists, the installer skips configuration prompts and proceeds directly to installation. This allows re-running the installer after pulling updates.
 
-### 4. Start LM Studio
+### 3. Start LM Studio
 
 Open LM Studio and load a vision-capable model (e.g., `qwen/qwen3-vl-4b`).
 
-### 5. Start Hindsight
+### 4. Start Hindsight
 
 ```bash
 ./hindsight.sh start
 ```
 
-### 6. Open the Web Dashboard
+### 5. Open the Web Dashboard
 
 Navigate to `http://localhost:5173` (or your configured WEB_PORT) to view the activity stream and chat with the AI about your recent activity.
 
@@ -90,7 +90,7 @@ curl http://localhost:3000/worklogs/counts
 curl "http://localhost:3000/worklogs?start=1706745600&end=1706832000"
 
 # Get worklogs for the last hour
-curl "http://localhost:3000/worklogs?start=$(($(date +%s) - 3600))"
+curl "http://localhost:3000/worklogs?start=$(($(date +%s) - 3600))&end=$(date +%s)"
 ```
 
 ## Configuration
@@ -113,6 +113,8 @@ VISION_MODEL=qwen/qwen3-vl-4b
 # Web dashboard port
 WEB_PORT=5173
 ```
+
+Use `./hindsight.sh start -v` to enable verbose API request logging.
 
 ## Project Structure
 
