@@ -48,7 +48,7 @@ If `.env` already exists, the installer skips configuration prompts and proceeds
 
 ### 3. Start LM Studio
 
-Open LM Studio and load a vision-capable model (e.g., `qwen/qwen3-vl-4b`).
+Open LM Studio and load a vision-capable model trained for tool use. `qwen/qwen3-vl-8b` performed well during testing.
 
 ### 4. Start Hindsight
 
