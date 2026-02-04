@@ -195,9 +195,13 @@ echo "  Creating data directories..."
 mkdir -p data/screenshots
 mkdir -p logs
 
-# Install npm dependencies (--engine-strict enforces Node.js version from package.json)
-echo "  Installing npm dependencies (this may take a moment)..."
-npm install --engine-strict
+# Install and build each package individually
+PACKAGES=("packages/api" "packages/image-summarizer" "packages/plugin" "packages/web")
+
+for pkg in "${PACKAGES[@]}"; do
+    echo "  Installing and building $pkg..."
+    (cd "$pkg" && npm install && npm run build)
+done
 
 echo ""
 echo -e "${GREEN}╔════════════════════════════════════════════════════════════╗${NC}"
