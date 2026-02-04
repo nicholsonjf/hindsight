@@ -13,8 +13,11 @@ AI-powered activity tracking for macOS. Hindsight automatically captures screens
 
 ## Prerequisites
 
+> [!IMPORTANT]
+> **Node.js 22.21.1** is required. Installation will fail without it.
+> Use `nvm install 22.21.1` or download from [nodejs.org](https://nodejs.org/)
+
 - **macOS** (required for `screencapture`)
-- **Node.js 18+**
 - **LM Studio** with a vision-capable model (e.g., `qwen/qwen3-vl-4b`)
 
 ## Quick Start
@@ -33,8 +36,8 @@ cd hindsight
 ```
 
 The installer will:
-- Check prerequisites (macOS, Node.js 18+, Xcode CLT)
-- Clone and build the lmstudio.js SDK
+- Check prerequisites (macOS, Node.js, Xcode CLT)
+- Clone and build the lmstudio-js SDK
 - Prompt for LM Studio API token
 - Configure capture interval and other settings
 - Install npm dependencies
