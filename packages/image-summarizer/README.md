@@ -6,37 +6,19 @@ A TypeScript command-line tool that sends screenshots to LM Studio for AI-powere
 
 ### 1. Environment Setup
 
-Create a `.env` file in the project root directory:
+Create a `.env` file in the project root (hindsight directory):
 
 ```bash
 LM_API_TOKEN=your_token_here
 ```
 
-### 2. LM Studio Setup
+### 2. LM Studio SDK
 
-This project uses the **lmstudio-js SDK** as a local file dependency (not from npm, as the npm package contains a bug).
-
-**Required directory structure:**
-```
-parent/
-  ├── lmstudio-js/       (sibling directory)
-  └── hindsight-image-summarizer/  (this project)
-```
-
-**Setup lmstudio-js:**
-
-```bash
-cd ..
-git clone https://github.com/lmstudio-ai/lmstudio-js.git
-cd lmstudio-js
-npm install
-npm run build
-cd ../hindsight-image-summarizer
-```
+This package uses the **lmstudio-js SDK** as a local file dependency (not from npm, as the npm package contains a bug). The SDK is cloned to `lmstudio-js/` at the project root by `install.sh`.
 
 ### 3. Worklog API
 
-Ensure a worklog API is running at `http://localhost:3000/worklogs` that accepts POST requests with the following JSON format:
+Ensure the API server is running at `http://localhost:3000/worklogs` that accepts POST requests with the following JSON format:
 
 ```json
 {
@@ -47,17 +29,12 @@ Ensure a worklog API is running at `http://localhost:3000/worklogs` that accepts
 
 ## Quick Start
 
-Use the initialization script to set up the development environment:
+Install dependencies and build:
 
 ```bash
-./init.sh
+npm install
+npm run build
 ```
-
-This script will:
-- Verify `.env` file exists
-- Check that `lmstudio-js` is properly set up
-- Install dependencies
-- Build the TypeScript code
 
 ## Usage
 
@@ -153,23 +130,14 @@ node dist/index.js ./nonexistent.png qwen/qwen3-vl-4b
 ├── src/
 │   └── index.ts          # Main application code
 ├── dist/                 # Compiled JavaScript output
-├── test-images/          # Test screenshot images
-├── .env                  # Environment variables (not committed)
 ├── package.json          # Dependencies and scripts
 ├── tsconfig.json         # TypeScript configuration
-├── init.sh              # Environment setup script
-└── feature_list.json    # Complete feature test list
+└── README.md             # This file
 ```
 
 ## Important Notes
 
 - **DO NOT** install `@lmstudio/sdk` from npm (it has a bug)
-- **ONLY** use the local file dependency: `"lmstudio-js": "file:../lmstudio-js/publish/sdk"`
-- The lmstudio-js SDK must be built before use
+- **ONLY** use the local file dependency: `"lmstudio-js": "file:../../lmstudio-js/publish/sdk"`
+- The lmstudio-js SDK must be built before use (handled by `install.sh`)
 - All image filenames must contain a unix timestamp
-
-## Community & Help
-
-- [lmstudio.js GitHub](https://github.com/lmstudio-ai/lmstudio.js)
-- [LM Studio Documentation](https://lmstudio.ai/docs/welcome)
-- [LM Studio Discord](https://discord.gg/6Q7Xn6MRVS)

@@ -1,12 +1,12 @@
 # Hindsight Screenshot Capture Script
 
-A macOS shell script that continuously captures screenshots at user-defined intervals and passes each screenshot to a Node.js summarization program. This is the capture component of the Hindsight activity tracking system.
+A macOS shell script that continuously captures screenshots at user-defined intervals and passes each screenshot to the image-summarizer for AI-powered analysis. This is the capture component of the Hindsight activity tracking system.
 
 ## Overview
 
 This script automates the process of:
 1. Capturing screenshots at regular intervals
-2. Passing each screenshot to a Node.js summarization program (`summarize.ts`)
+2. Passing each screenshot to the `image-summarizer` package for AI analysis
 3. Cleaning up screenshots after successful processing
 4. Running continuously until interrupted
 
@@ -18,17 +18,12 @@ This script automates the process of:
 
 ## Quick Start
 
-1. **Setup the environment:**
-   ```bash
-   ./init.sh
-   ```
-
-2. **Run with defaults** (1-minute interval, `./screenshots/` directory):
+1. **Run with defaults** (1-minute interval, `./screenshots/` directory):
    ```bash
    ./capture.sh
    ```
 
-3. **Custom configuration:**
+2. **Custom configuration:**
    ```bash
    # Custom directory
    ./capture.sh /path/to/screenshots/
@@ -40,7 +35,7 @@ This script automates the process of:
    ./capture.sh ./screenshots/ 0.1
    ```
 
-4. **Stop the script:**
+3. **Stop the script:**
    Press `Ctrl+C`
 
 ## Usage
@@ -68,7 +63,7 @@ Flags:
 
 ### Processing Flow
 1. Capture screenshot → `[timestamp].png`
-2. Run `node summarize.ts [screenshot_path]`
+2. Run `node packages/image-summarizer/dist/index.js [screenshot_path] [vision_model]`
 3. If successful → delete screenshot
 4. If failed → preserve screenshot for debugging and exit
 5. Wait for specified interval
@@ -77,7 +72,7 @@ Flags:
 ### Error Handling
 - Validates that `screencapture` and `node` commands exist before starting
 - If `screencapture` fails: prints error, exits with code 1
-- If `summarize.ts` fails: prints error, preserves screenshot, exits with code 1
+- If `image-summarizer` fails: prints error, preserves screenshot, exits with code 1
 - All errors include informative messages about what went wrong
 
 ## Development
@@ -86,79 +81,16 @@ Flags:
 ```
 .
 ├── capture.sh          # Main capture script
-├── summarize.ts        # Screenshot summarization program
-├── init.sh            # Development environment setup
-├── feature_list.json  # Comprehensive test cases
-├── README.md          # This file
-└── screenshots/       # Default output directory (created automatically)
+├── README.md           # This file
+└── screenshots/        # Default output directory (created automatically)
 ```
 
-### Testing
+The script depends on `packages/image-summarizer` being built. Run `npm run build` from that package directory first.
 
-The project includes 30 comprehensive test cases in `feature_list.json` covering:
-- Basic functionality (default arguments, custom paths, custom intervals)
-- Screenshot naming and capture flags
-- Directory creation and path handling
-- Summarization integration
-- Error handling (missing dependencies, failed commands)
-- Edge cases (fractional intervals, concurrent execution, signal handling)
-- User experience (help text, progress feedback, error messages)
+## Environment Variables
 
-To run manual tests:
-1. Create test fixtures as needed
-2. Run the script with appropriate parameters
-3. Verify behavior matches expected outcomes in `feature_list.json`
-
-### Mock summarize.ts
-
-For testing, a mock `summarize.ts` is created by `init.sh`:
-```typescript
-// Mock summarize.ts for testing
-const screenshotPath = process.argv[2];
-
-if (!screenshotPath) {
-    console.error('Error: No screenshot path provided');
-    process.exit(1);
-}
-
-console.log(`Processing screenshot: ${screenshotPath}`);
-
-setTimeout(() => {
-    console.log(`Successfully processed: ${screenshotPath}`);
-    process.exit(0);
-}, 500);
-```
-
-You can modify this to test different scenarios (failures, delays, etc.).
-
-## Success Criteria
-
-### Functionality
-- ✓ Script runs continuously until `Ctrl+C`
-- ✓ Screenshots saved with correct timestamp filenames
-- ✓ `summarize.ts` receives correct file path
-- ✓ Screenshot deleted only after successful summarization
-- ✓ Directory created automatically if missing
-- ✓ Defaults work when no arguments provided
-
-### Error Handling
-- ✓ Clear error message if `screencapture` fails
-- ✓ Clear error message if `node` fails
-- ✓ Screenshot preserved on failure for debugging
-- ✓ Non-zero exit code on any failure
-
-## Implementation Progress
-
-See `feature_list.json` for detailed test cases and current implementation status. Features are marked with `"passes": true` when fully implemented and tested.
-
-## Contributing
-
-This is a production-quality implementation with comprehensive testing. When making changes:
-1. Review relevant test cases in `feature_list.json`
-2. Implement the feature
-3. Test thoroughly against all applicable test cases
-4. Update `"passes": true` for completed features
-5. Commit with descriptive messages
+The script reads from the project root `.env` file:
+- `VISION_MODEL`: The vision model to use (default: `qwen/qwen3-vl-4b`)
 
 ## License
 

@@ -23,25 +23,10 @@ A REST API server for storing and retrieving work logs with Unix timestamp-based
 
 ### Prerequisites
 
-- Node.js 18 or higher
+- Node.js 22.x or higher
 - npm
 
 ### Setup and Run
-
-1. Clone the repository
-2. Run the initialization script:
-   ```bash
-   ./init.sh
-   ```
-
-The script will:
-- Install all dependencies
-- Compile TypeScript code
-- Start the development server on port 3000
-
-### Manual Setup
-
-If you prefer manual setup:
 
 ```bash
 # Install dependencies
@@ -257,20 +242,10 @@ Data persists across server restarts.
 │   ├── contract.ts      # ts-rest API contract
 │   ├── database.ts      # Database initialization
 │   └── routes.ts        # Route handlers
-├── feature_list.json    # Test cases and requirements
-├── init.sh              # Setup and start script
 ├── package.json         # Dependencies
 ├── tsconfig.json        # TypeScript configuration
 └── README.md            # This file
 ```
-
-### Running Tests
-
-Test cases are defined in `feature_list.json`. Each test case includes:
-- Category (functional or style)
-- Description of what is being tested
-- Step-by-step testing instructions
-- Pass/fail status
 
 ## Contributing
 
