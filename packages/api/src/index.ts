@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import { createExpressEndpoints } from '@ts-rest/express';
 import { contract } from './contract.js';
 import { router } from './routes.js';
@@ -10,6 +11,9 @@ const VERBOSE = process.env.VERBOSE === '1';
 
 // Initialize database
 initDatabase();
+
+// Enable CORS for all origins (web dashboard runs on different port)
+app.use(cors());
 
 // Parse JSON request bodies
 app.use(express.json());
