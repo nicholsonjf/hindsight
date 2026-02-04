@@ -13,6 +13,11 @@ AI-powered activity tracking for macOS. Hindsight automatically captures screens
 - **Privacy-first** - Everything runs locally, no data leaves your machine
 - **LM Studio plugin** - Ask questions about your activity directly in LM Studio
 
+## Usage
+
+<p>Get a summary of what you worked on today using LM Studio</p>
+<img width="1624" height="1056" alt="hindsight-lmstudio" src="https://github.com/user-attachments/assets/d8a59ced-fc37-467f-9149-9a69ddc3058e" />
+
 ## Prerequisites
 
 > [!IMPORTANT]
