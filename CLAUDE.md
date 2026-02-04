@@ -19,16 +19,16 @@ Hindsight is an AI-powered activity tracking system for macOS. It captures scree
 # Installation/setup
 ./install.sh              # Full setup (deps, SDK, config, build)
 
-# Build all packages
-npm install && npm run build
+# Install and build a specific package
+cd packages/api && npm install && npm run build
 
 # Package-specific development
-npm run dev --workspace=packages/api      # API with hot reload (tsx watch)
-npm run dev --workspace=packages/web      # Vite dev server
-npm run dev --workspace=packages/plugin   # Plugin dev mode (lms dev)
+cd packages/api && npm run dev      # API with hot reload (tsx watch)
+cd packages/web && npm run dev      # Vite dev server
+cd packages/plugin && npm run dev   # Plugin dev mode (lms dev)
 
 # Test production web build
-npm run preview --workspace=packages/web  # Serves dist on port 5173
+cd packages/web && npm run preview  # Serves dist on port 5173
 
 # Test image summarizer directly
 node packages/image-summarizer/dist/index.js /path/to/image.png qwen/qwen3-vl-4b
@@ -39,7 +39,7 @@ bash packages/capture-daemon/capture.sh ./data/screenshots/ 0.1  # 6-second inte
 
 ## Architecture
 
-Monorepo with npm workspaces containing 5 packages:
+Monorepo with 5 packages (each manages its own dependencies):
 
 ```
 packages/api              Express REST API + SQLite (port 3000)
@@ -70,7 +70,7 @@ lmstudio-js/              Local SDK dependency (cloned at install)
 
 ## Technical Notes
 
-- **Node.js**: Requires Node.js 22.x (see `engines` in package.json)
+- **Node.js**: Requires Node.js 22.x
 - **Local SDK dependency**: image-summarizer and web use `file:../../lmstudio-js/...` - the npm package has a bug
 - **Module systems vary**: API/image-summarizer/web use ES modules (`"type": "module"`), plugin uses CommonJS
 - **Database**: SQLite `worklogs.db` created at runtime in packages/api/

@@ -40,8 +40,7 @@ The installer will:
 - Clone and build the lmstudio-js SDK
 - Prompt for LM Studio API token
 - Configure capture interval and other settings
-- Install npm dependencies
-- Build TypeScript packages
+- Install dependencies and build each package
 
 If `.env` already exists, the installer skips configuration prompts and proceeds directly to installation. This allows re-running the installer after pulling updates.
 
@@ -121,7 +120,6 @@ WEB_PORT=5173
 hindsight/
 ├── install.sh              # Installation script
 ├── hindsight.sh            # Service manager (start/stop/status)
-├── package.json            # npm workspaces root
 ├── .env                    # Configuration (created by install.sh)
 ├── .env.example            # Configuration template
 ├── lmstudio-js/            # SDK (cloned by install.sh)
@@ -184,7 +182,7 @@ Make sure LM Studio is running and has loaded a vision model. The capture daemon
 1. Check if it's running: `./hindsight.sh status`
 2. Check the web log: `tail -f logs/web.log`
 3. Verify the web port isn't in use: `lsof -i :5173`
-4. Make sure the web package was built: `npm run build --workspace=packages/web`
+4. Make sure the web package was built: `cd packages/web && npm run build`
 
 ### npm install fails with better-sqlite3 errors
 
@@ -199,12 +197,11 @@ System Preferences > Privacy & Security > Screen Recording > Enable for Terminal
 
 ## Development
 
-```bash
-# Install dependencies
-npm install
+Each package manages its own dependencies independently (no npm workspaces).
 
-# Build all packages
-npm run build
+```bash
+# Install and build a specific package
+cd packages/api && npm install && npm run build
 
 # Run API in development mode
 cd packages/api && npm run dev
