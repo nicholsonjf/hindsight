@@ -36,12 +36,11 @@ Examples:
 The script will:
   1. Capture a screenshot using macOS screencapture
   2. Pass the screenshot path to the image-summarizer
-  3. Delete the screenshot after successful processing
-  4. Wait for the specified interval
-  5. Repeat until interrupted (Ctrl+C)
+  3. Wait for the specified interval
+  4. Repeat until interrupted (Ctrl+C)
 
-Error Handling:
-  - Screenshots are preserved if summarization fails
+Note:
+  - Screenshots are preserved in the output directory
   - Script exits with non-zero code on any error
   - Requires macOS (screencapture command) and Node.js
 
@@ -176,10 +175,6 @@ capture_and_process() {
 
     if node "$IMAGE_SUMMARIZER" "$SCREENSHOT_PATH" "$VISION_MODEL"; then
         echo "  ✓ Processing complete"
-
-        # Delete screenshot after successful processing
-        rm "$SCREENSHOT_PATH"
-        echo "  ✓ Screenshot cleaned up"
     else
         EXIT_CODE=$?
         echo "" >&2

@@ -9,19 +9,27 @@ export function initDatabase(): void {
     CREATE TABLE IF NOT EXISTS worklogs (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       timestamp INTEGER NOT NULL,
-      log TEXT NOT NULL
+      log TEXT NOT NULL,
+      screenshot_path TEXT
     )
   `);
+
+  // Migration: add screenshot_path column if it doesn't exist
+  const columns = db.pragma('table_info(worklogs)') as { name: string }[];
+  const hasScreenshotPath = columns.some((col) => col.name === 'screenshot_path');
+  if (!hasScreenshotPath) {
+    db.exec('ALTER TABLE worklogs ADD COLUMN screenshot_path TEXT');
+  }
 }
 
 // Create a new worklog entry
 export function createWorklog(data: CreateWorklogRequest): Worklog {
   const stmt = db.prepare(`
-    INSERT INTO worklogs (timestamp, log)
-    VALUES (?, ?)
+    INSERT INTO worklogs (timestamp, log, screenshot_path)
+    VALUES (?, ?, ?)
   `);
 
-  const result = stmt.run(data.timestamp, data.log);
+  const result = stmt.run(data.timestamp, data.log, data.screenshot_path ?? null);
 
   return {
     id: Number(result.lastInsertRowid),

@@ -41,7 +41,7 @@ function extractTimestamp(imagePath: string): number {
 /**
  * Post summary to worklog API
  */
-async function postToWorklogAPI(timestamp: number, summary: string): Promise<number> {
+async function postToWorklogAPI(timestamp: number, summary: string, screenshotPath: string): Promise<number> {
   try {
     const response = await fetch('http://localhost:3000/worklogs', {
       method: 'POST',
@@ -50,7 +50,8 @@ async function postToWorklogAPI(timestamp: number, summary: string): Promise<num
       },
       body: JSON.stringify({
         timestamp,
-        log: summary
+        log: summary,
+        screenshot_path: screenshotPath
       })
     });
 
@@ -147,8 +148,9 @@ async function main() {
     process.exit(EXIT_CODE_SUMMARIZATION_FAILED);
   }
 
-  // Post to worklog API
-  const statusCode = await postToWorklogAPI(timestamp, summary);
+  // Post to worklog API (include absolute path to screenshot)
+  const absoluteImagePath = resolve(imagePath);
+  const statusCode = await postToWorklogAPI(timestamp, summary, absoluteImagePath);
 
   // Output success information
   console.log(`Success! API Response: ${statusCode}`);

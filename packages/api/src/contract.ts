@@ -14,6 +14,7 @@ export const worklogSchema = z.object({
 export const createWorklogSchema = z.object({
   timestamp: z.number().int(),
   log: z.string().min(1),
+  screenshot_path: z.string().optional(),
 });
 
 // Zod schema for GET query parameters
