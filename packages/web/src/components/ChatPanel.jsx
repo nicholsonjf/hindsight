@@ -1,6 +1,71 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { LMStudioClient, Chat } from "lmstudio-js";
+import { LM_STUDIO_TOOL_DEFINITIONS, executeHindsightTool } from '../lib/hindsightTools'
 import './ChatPanel.css'
+
+const DEFAULT_LM_STUDIO_URL = 'http://127.0.0.1:1234'
+const DEFAULT_HINDSIGHT_API_URL = 'http://localhost:3000'
+const DEFAULT_CHAT_MODEL = 'qwen/qwen3-vl-4b'
+const MAX_TOOL_CALLING_ROUNDS = 6
+
+function normalizeLmStudioBaseUrl(rawUrl) {
+  const trimmed = rawUrl.trim().replace(/\/+$/, '')
+  if (trimmed.startsWith('ws://')) return `http://${trimmed.slice(5)}`
+  if (trimmed.startsWith('wss://')) return `https://${trimmed.slice(6)}`
+  return trimmed
+}
+
+function parseJsonSafe(value, fallback = {}) {
+  try {
+    return JSON.parse(value)
+  } catch {
+    return fallback
+  }
+}
+
+function toErrorMessage(error) {
+  return error instanceof Error ? error.message : String(error)
+}
+
+async function fetchConfiguredModel(hindsightApiUrl) {
+  const response = await fetch(`${hindsightApiUrl}/config`)
+  if (!response.ok) {
+    throw new Error(`Failed to fetch config (${response.status})`)
+  }
+
+  const body = await response.json()
+  return typeof body?.visionModel === 'string' && body.visionModel.trim()
+    ? body.visionModel.trim()
+    : null
+}
+
+async function createChatCompletion({ baseUrl, apiToken, model, messages }) {
+  const headers = {
+    'Content-Type': 'application/json'
+  }
+  if (apiToken) {
+    headers.Authorization = `Bearer ${apiToken}`
+  }
+
+  const response = await fetch(`${baseUrl}/v1/chat/completions`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      model,
+      messages,
+      tools: LM_STUDIO_TOOL_DEFINITIONS,
+      tool_choice: 'auto',
+      temperature: 0
+    })
+  })
+
+  if (!response.ok) {
+    const body = await response.text()
+    const details = body ? `: ${body}` : ''
+    throw new Error(`LM Studio API error ${response.status}${details}`)
+  }
+
+  return response.json()
+}
 
 function ChatPanel() {
   const [messages, setMessages] = useState([])
@@ -9,9 +74,11 @@ function ChatPanel() {
   const [error, setError] = useState(null)
   const messagesEndRef = useRef(null)
   const inputRef = useRef(null)
-  const clientRef = useRef(null)
-  const toolsSessionRef = useRef(null)
-  const chatRef = useRef(Chat.empty())
+  const conversationRef = useRef([])
+  const lmStudioBaseUrlRef = useRef(DEFAULT_LM_STUDIO_URL)
+  const hindsightApiUrlRef = useRef(DEFAULT_HINDSIGHT_API_URL)
+  const apiTokenRef = useRef('')
+  const modelRef = useRef(DEFAULT_CHAT_MODEL)
 
   const examplePrompts = [
     'Summarize my recent activity',
@@ -20,43 +87,30 @@ function ChatPanel() {
     'What should I focus on next?'
   ]
 
-  // Initialize LM Studio client and plugin tools session
+  // Initialize connection settings and load chat model from API config (.env -> VISION_MODEL)
   useEffect(() => {
-    const initClient = async () => {
-      try {
-        const apiToken = import.meta.env.VITE_LM_API_TOKEN
-        if (!apiToken) {
-          console.warn('LM_API_TOKEN not found in environment variables. LM Studio connection may fail.')
-        }
-        const lmStudioUrl = import.meta.env.VITE_LM_STUDIO_URL || 'ws://127.0.0.1:1234'
-        const hindsightApiUrl = import.meta.env.VITE_HINDSIGHT_API_URL || 'http://localhost:3000'
-        const client = new LMStudioClient({
-          baseUrl: lmStudioUrl,
-          apiToken: apiToken
-        })
-        clientRef.current = client
+    let disposed = false
+    lmStudioBaseUrlRef.current = normalizeLmStudioBaseUrl(import.meta.env.VITE_LM_STUDIO_URL || DEFAULT_LM_STUDIO_URL)
+    hindsightApiUrlRef.current = (import.meta.env.VITE_HINDSIGHT_API_URL || DEFAULT_HINDSIGHT_API_URL).trim().replace(/\/+$/, '')
+    apiTokenRef.current = (import.meta.env.VITE_LM_API_TOKEN || '').trim()
+    modelRef.current = (import.meta.env.VITE_LM_CHAT_MODEL || DEFAULT_CHAT_MODEL).trim()
 
-        // Set up remote tools session for the hindsight plugin
-        const toolsSession = await client.plugins.pluginTools("nicholsonjf/hindsight", {
-          pluginConfig: {
-            fields: [
-              { key: "hindsightApiUrl", value: hindsightApiUrl }
-            ]
-          }
-        })
-        toolsSessionRef.current = toolsSession
-        console.log('Hindsight plugin tools session initialized')
-      } catch (err) {
-        console.error('Failed to initialize LM Studio client or plugin tools:', err)
+    const initModel = async () => {
+      try {
+        const configuredModel = await fetchConfiguredModel(hindsightApiUrlRef.current)
+        if (!disposed && configuredModel) {
+          modelRef.current = configuredModel
+          console.info(`Using configured VISION_MODEL from API: ${configuredModel}`)
+        }
+      } catch (configError) {
+        console.warn('Could not load configured VISION_MODEL from API; using chat fallback model:', configError)
       }
     }
-    initClient()
 
-    // Cleanup tools session on unmount
+    void initModel()
+
     return () => {
-      if (toolsSessionRef.current && toolsSessionRef.current[Symbol.dispose]) {
-        toolsSessionRef.current[Symbol.dispose]()
-      }
+      disposed = true
     }
   }, [])
 
@@ -71,7 +125,7 @@ function ChatPanel() {
 
   // Handle sending message
   const sendMessage = async () => {
-    if (!input.trim() || !clientRef.current || loading) return
+    if (!input.trim() || loading) return
 
     const userMessage = input.trim()
     setInput('')
@@ -79,68 +133,73 @@ function ChatPanel() {
     setLoading(true)
     setError(null)
 
-    // Append user message to chat history
-    chatRef.current.append("user", userMessage)
-
-    // Add placeholder for streaming assistant response
+    const chatMessages = [...conversationRef.current, { role: 'user', content: userMessage }]
     let assistantContent = ''
     setMessages(prev => [...prev, { role: 'assistant', content: '' }])
 
     try {
-      // Get list of loaded models
-      const models = await clientRef.current.llm.listLoaded()
-
-      if (models.length === 0) {
-        throw new Error('No models loaded in LM Studio')
-      }
-
-      // Use the first loaded model
-      const model = models[0]
-
-      // Get plugin tools (may be empty if plugin not available)
-      const tools = toolsSessionRef.current?.tools || []
-
-      // Use .act() method with plugin tools for agentic behavior
-      await model.act(chatRef.current, tools, {
-        onMessage: (message) => {
-          // Append message to chat history to maintain conversation context
-          chatRef.current.append(message)
-        },
-        onPredictionFragment: (fragment) => {
-          // Skip structural fragments (formatting tokens)
-          if (fragment.isStructural) return
-          // Accumulate content and update display
-          assistantContent += fragment.content
-          setMessages(prev => {
-            const updated = [...prev]
-            updated[updated.length - 1] = { role: 'assistant', content: assistantContent }
-            return updated
-          })
-        },
-        onToolCallRequestEnd: (_roundIndex, _callId, info) => {
-          console.log(`Tool called: ${info.toolCallRequest.name}`, info.toolCallRequest.arguments)
-        },
-        onToolCallResult: (_roundIndex, _callId, result) => {
-          console.log('Tool result:', result)
-        }
-      })
-
-      // If no content was streamed, update with final message
-      if (!assistantContent) {
-        setMessages(prev => {
-          const updated = [...prev]
-          updated[updated.length - 1] = { role: 'assistant', content: 'I processed your request but have no text response.' }
-          return updated
+      for (let round = 0; round < MAX_TOOL_CALLING_ROUNDS; round += 1) {
+        const completion = await createChatCompletion({
+          baseUrl: lmStudioBaseUrlRef.current,
+          apiToken: apiTokenRef.current,
+          model: modelRef.current,
+          messages: chatMessages
         })
+
+        const choice = completion?.choices?.[0]
+        const assistantMessage = choice?.message
+        if (!assistantMessage) {
+          throw new Error('LM Studio returned an empty response')
+        }
+
+        chatMessages.push({
+          role: 'assistant',
+          content: assistantMessage.content ?? '',
+          tool_calls: assistantMessage.tool_calls ?? []
+        })
+
+        const toolCalls = Array.isArray(assistantMessage.tool_calls) ? assistantMessage.tool_calls : []
+        if (choice.finish_reason === 'tool_calls' && toolCalls.length > 0) {
+          for (const toolCall of toolCalls) {
+            const toolName = toolCall?.function?.name
+            const toolArgs = parseJsonSafe(toolCall?.function?.arguments ?? '{}', {})
+            const toolResult = await executeHindsightTool(toolName, toolArgs, hindsightApiUrlRef.current)
+            console.log(`Tool called: ${toolName}`, toolArgs)
+            console.log('Tool result:', toolResult)
+            chatMessages.push({
+              role: 'tool',
+              tool_call_id: toolCall.id,
+              name: toolName,
+              content: JSON.stringify(toolResult)
+            })
+          }
+          continue
+        }
+
+        assistantContent = (assistantMessage.content || '').trim()
+        break
       }
+
+      if (!assistantContent) {
+        assistantContent = 'I processed your request but have no text response.'
+      }
+
+      conversationRef.current = chatMessages
+      setMessages(prev => {
+        const updated = [...prev]
+        updated[updated.length - 1] = { role: 'assistant', content: assistantContent }
+        return updated
+      })
     } catch (err) {
-      console.error('LM Studio error:', err)
-      setError('Failed to connect to LM Studio. Please ensure LM Studio is running at http://127.0.0.1:1234 with a model loaded.')
+      console.error('LM Studio chat error:', err)
+      const errorMessage = toErrorMessage(err)
+      const configuredModel = modelRef.current
+      setError(`Chat failed: ${errorMessage}`)
       setMessages(prev => {
         const updated = [...prev]
         updated[updated.length - 1] = {
           role: 'assistant',
-          content: 'Sorry, I couldn\'t connect to LM Studio. Please check that it\'s running and a model is loaded.'
+          content: `Sorry, chat failed. Ensure LM Studio is running at ${lmStudioBaseUrlRef.current} and model "${configuredModel}" is loaded.`
         }
         return updated
       })

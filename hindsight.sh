@@ -174,28 +174,6 @@ cmd_start() {
         fi
     fi
 
-    # Start web dashboard
-    if is_web_running; then
-        echo -e "${YELLOW}Web dashboard is already running (PID: $(cat "$WEB_PID_FILE"))${NC}"
-    else
-        echo -n "  Starting web dashboard on port $WEB_PORT... "
-
-        # Start web server in background (using vite preview for production build)
-        nohup npm run preview --prefix "$SCRIPT_DIR/packages/web" >> "$WEB_LOG" 2>&1 &
-        local web_pid=$!
-        echo "$web_pid" > "$WEB_PID_FILE"
-
-        # Wait a moment and check if it started
-        sleep 2
-        if ps -p "$web_pid" > /dev/null 2>&1; then
-            echo -e "${GREEN}OK${NC} (PID: $web_pid)"
-        else
-            echo -e "${RED}FAILED${NC}"
-            echo "  Check logs: $WEB_LOG"
-            rm -f "$WEB_PID_FILE"
-        fi
-    fi
-
     # Start LM Studio plugin dev server
     if is_plugin_running; then
         echo -e "${YELLOW}Plugin dev server is already running (PID: $(cat "$PLUGIN_PID_FILE"))${NC}"
@@ -215,6 +193,28 @@ cmd_start() {
             echo -e "${RED}FAILED${NC}"
             echo "  Check logs: $PLUGIN_LOG"
             rm -f "$PLUGIN_PID_FILE"
+        fi
+    fi
+
+    # Start web dashboard
+    if is_web_running; then
+        echo -e "${YELLOW}Web dashboard is already running (PID: $(cat "$WEB_PID_FILE"))${NC}"
+    else
+        echo -n "  Starting web dashboard on port $WEB_PORT... "
+
+        # Start web server in background (using vite preview for production build)
+        nohup npm run preview --prefix "$SCRIPT_DIR/packages/web" >> "$WEB_LOG" 2>&1 &
+        local web_pid=$!
+        echo "$web_pid" > "$WEB_PID_FILE"
+
+        # Wait a moment and check if it started
+        sleep 2
+        if ps -p "$web_pid" > /dev/null 2>&1; then
+            echo -e "${GREEN}OK${NC} (PID: $web_pid)"
+        else
+            echo -e "${RED}FAILED${NC}"
+            echo "  Check logs: $WEB_LOG"
+            rm -f "$WEB_PID_FILE"
         fi
     fi
 
