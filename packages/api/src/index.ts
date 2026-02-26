@@ -46,6 +46,13 @@ if (VERBOSE) {
   console.log('Verbose logging enabled - all requests will be logged');
 }
 
+// Runtime config for clients that need to mirror .env settings.
+app.get('/config', (_req, res) => {
+  res.json({
+    visionModel: process.env.VISION_MODEL || 'qwen/qwen3-vl-4b',
+  });
+});
+
 // Create ts-rest endpoints
 createExpressEndpoints(contract, router, app);
 
@@ -57,4 +64,5 @@ app.listen(PORT, () => {
   console.log(`  POST http://localhost:${PORT}/worklogs`);
   console.log(`  GET  http://localhost:${PORT}/worklogs?start=<timestamp>&end=<timestamp>`);
   console.log(`  GET  http://localhost:${PORT}/worklogs/counts?offset=<days>  (default: 14)`);
+  console.log(`  GET  http://localhost:${PORT}/config`);
 });
